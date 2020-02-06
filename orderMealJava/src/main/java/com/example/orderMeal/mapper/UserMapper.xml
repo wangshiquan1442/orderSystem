@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.UserMapper">
+    <select id="selectUserExceptAdmin" resultType="User">
+        select * from user where id not like 'admin%'
+    </select>
+    <select id="selectAllUser" resultType="User">el-aside
+        select id, name, type, credit, date from user
+    </select>
+    <select id="selectUserById" resultType="User">
+        select id, name, type, credit, date from user where id = #{id}
+    </select>
+    <select id="screenUser" resultType="User">
+        select id, name, type, credit, date from user where 1 = 1
+        <if test="name != null">
+            and name = #{name}
+        </if>
+        <if test="minCredit != null">
+            and credit &gt;= #{minCredit}
+        </if>
+        <if test="maxCredit != null">i
+            and credit &lt;= #{maxCredit}
+        </if>
+        <if test="type != null">
+            and type = #{type}
+        </if>
+    </select>
+    <select id="userLogin" resultType="user">
+        select id, name, type, credit, date from user where name = #{name} and passwd = #{passwd}
+        <if test="type != null">
+            and type = #{type}
+        </if>
+    </select>
+    <update id="updateUser">
+        update user set credit = #{credit}, type = #{type} where id = #{id}
+    </update>
+    <delete id="delUser">
+        delete from user where id = #{id}
+    </delete>
+</mapper>

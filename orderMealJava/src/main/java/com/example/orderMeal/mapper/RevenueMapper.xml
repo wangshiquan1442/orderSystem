@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.RevenueMapper">
+    <select id="screenRevenue" resultType="java.util.HashMap">
+        SELECT
+        mealName,
+        category,
+        sum(_order.quantity) AS quantities,
+        sum(_order.price * _order.quantity) AS prices
+        FROM
+        _order, meal
+        WHERE paid = 1
+        AND meal.category = #{cate}
+        AND meal.id = _order.mealId
+        <if test="sdate != null and edate != null">
+            AND DATE_FORMAT(`odate`, '%m-%d') >= DATE_FORMAT(#{sdate}, '%m-%d')
+            AND DATE_FORMAT(`odate`, '%m-%d') &lt;= DATE_FORMAT(#{edate}, '%m-%d')
+        </if>
+        <choose>
+            <when test="sort == 'turnoverDesc'">
+                ORDER BY prices desc
+            </when>
+            <when test="sort == 'turnoverAsc'">
+                ORDER BY prices asc
+            </when>
+            <when test="sort == 'salesDesc'">
+                ORDER BY quantities desc
+            </when>
+            <when test="sort == 'salesAsc'">
+                ORDER BY quantities asc
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        GROUP BY
+            mealId
+    </select>
+</mapper>

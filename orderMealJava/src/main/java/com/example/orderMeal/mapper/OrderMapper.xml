@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.OrderMapper">
+    <select id="selectPaidOrder" resultType="Order">
+        select * from _order where paid = 1 order by odate desc, userId
+    </select>
+    <select id="selectPaidOrderByUid" resultType="java.util.HashMap">
+        SELECT
+            mealId,
+            mealName,
+            userId,
+            quantity,
+            price,
+            ref,
+            DATE_FORMAT(
+                `odate`,
+                '%Y-%m-%d'
+            ) AS odate
+        FROM
+            _order
+        WHERE
+            paid = 1
+        AND userId = #{userId}
+        ORDER BY
+            odate DESC,
+            ref
+    </select>
+    <select id="selectUnpaidOrderByUid" resultType="Order">
+        select * from _order where userId = #{userId} and paid = 0
+    </select>
+    <select id="selectByUidAndMid" resultType="Order">
+        select * from _order where userId = #{userId} and mealId = #{mealId} and paid = 0
+    </select>
+    <insert id="insertOrder">
+        insert into _order(mealId,mealName,userId,quantity,price,odate,paid,ref) values(#{mealId},#{mealName},#{userId},#{quantity},#{price},#{odate},#{paid},#{ref})
+    </insert>
+    <update id="updateQuantity">
+        update _order set quantity = #{quantity}, odate = #{odate} where userId = #{userId} and mealId = #{mealId} and paid = 0
+    </update>
+    <delete id="delUnpaidOrderByMid">
+        delete from _order where userId = #{userId} and mealId = #{mealId} and paid = 0
+    </delete>
+    <update id="updatePaid">
+        update _order set paid = 1,ref = #{ref} where userId = #{userId} and mealId = #{mealId} and paid = 0
+    </update>
+    <select id="selectGroupByRef" resultType="java.util.HashMap">
+        SELECT * from (
+        SELECT
+            userId,
+            user.name as userName,
+            sum(quantity) as quantities,
+            sum(price) as prices,
+            DATE_FORMAT(`odate`, '%Y-%m-%d %H:%i:%S') as odate,
+            ref
+        FROM
+            _order, user
+        WHERE
+            paid = 1 and userId = user.id
+        <if test="userId != ''">
+            and userId = #{userId}
+        </if>
+        <if test="sdate != null and edate != null">
+            AND DATE_FORMAT(`odate`, '%Y-%m-%d') >= DATE_FORMAT(#{sdate}, '%Y-%m-%d')
+            AND DATE_FORMAT(`odate`, '%Y-%m-%d') &lt;= DATE_FORMAT(#{edate}, '%Y-%m-%d')
+        </if>
+        <if test="ref != null">
+            and ref like "%"#{ref}"%"
+        </if>
+        GROUP BY
+            ref
+        ORDER BY
+            odate DESC )
+        temp
+        where 1 = 1
+        <if test="minPrices != null">
+            and prices &gt;= #{minPrices}
+        </if>
+        <if test="maxPrices != null">
+            and prices &lt;= #{maxPrices}
+        </if>
+        <if test="currentPage != -1 and pageSize != -1">
+            LIMIT #{currentPage}, #{pageSize}
+        </if>
+    </select>
+    <select id="selectByRef" resultType="java.util.Map">
+        SELECT
+            _order.mealId, name, category, _order.price, _order.quantity, ref
+        FROM
+            _order, meal
+        WHERE
+            paid = 1
+        AND ref = #{ref}
+        AND _order.mealId = meal.id
+    </select>
+</mapper>

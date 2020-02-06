@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.MealMapper">
+    <select id="selectAllMeal" resultType="Meal">
+        select * from meal
+    </select>
+    <select id="selectMealById" resultType="Meal">
+        select * from meal where id = #{id}
+    </select>
+    <select id="selectMealByName" parameterType="String" resultType="Meal">
+        select * from meal where name like "%"#{name}"%"
+    </select>
+    <select id="selectMealCate" resultType="java.util.HashMap">
+        select distinct category from meal
+    </select>
+    <insert id="insertMeal">
+        insert into meal (name, `desc`, category, price) values(#{name}, #{desc}, #{category}, #{price})
+    </insert>
+    <update id="updateMeal">
+        update meal set name = #{name}, `desc` = #{desc}, category = #{category}, price = #{price} where id = #{id}
+    </update>
+    <delete id="delMeal">
+        delete from meal where id = #{id}
+    </delete>
+</mapper>

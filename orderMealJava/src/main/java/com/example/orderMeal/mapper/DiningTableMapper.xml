@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.DiningTableMapper">
+    <select id="selectAllDTable" resultType="DiningTable">
+        select * from dining_table order by tableId
+    </select>
+    <update id="updateDTable">
+        update dining_table set status = #{status}, capacity = #{capacity}, note = #{note} where tableId = #{tableId}
+    </update>
+    <insert id="insertDTable">
+        insert dining_table (tableId, status, capacity, note) values(#{tableId}, #{status}, #{capacity}, #{note})
+    </insert>
+</mapper>

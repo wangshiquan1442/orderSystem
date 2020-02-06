@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.BillMapper">
+    <select id="selectBillGroupByMealId" resultType="Bill">
+        SELECT
+        mealId,
+        mealName,
+        category,
+        sum(quantity) AS quantities,
+        sum(_order.price * quantity) AS prices
+        FROM
+        _order, meal
+        WHERE
+        paid = 1
+        AND _order.mealId = meal.id
+        GROUP BY
+        mealId
+    </select>
+    <select id="screenBillByMealName" resultType="java.util.HashMap">
+        SELECT
+        mealId,
+        mealName,
+        category,
+        sum(quantity) AS quantities,
+        sum(_order.price * quantity) AS prices
+        FROM
+        _order, meal
+        WHERE
+        paid = 1
+        AND _order.mealId = meal.id
+        <if test="specific != null">
+            AND
+            <foreach item="mealId" collection="specific" separator="," open="mealId in (" close=")" index="">
+                #{mealId, jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        <if test="sdate != null and edate != null">
+            AND DATE_FORMAT(`odate`, '%Y-%m-%d') >= DATE_FORMAT(#{sdate}, '%Y-%m-%d')
+            AND DATE_FORMAT(`odate`, '%Y-%m-%d') &lt;= DATE_FORMAT(#{edate}, '%Y-%m-%d')
+        </if>
+        GROUP BY mealName
+        <choose>
+            <when test="sort == 'turnoverDesc'">
+                ORDER BY prices desc
+            </when>
+            <when test="sort == 'turnoverAsc'">
+                ORDER BY prices asc
+            </when>
+            <when test="sort == 'salesDesc'">
+                ORDER BY quantities desc
+            </when>
+            <when test="sort == 'salesAsc'">
+                ORDER BY quantities asc
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+    <select id="screenBillByCategory" resultType="java.util.HashMap">
+        SELECT
+        category,
+        sum(_order.quantity) as quantities,
+        sum(
+        _order.quantity * _order.price
+        ) AS prices
+        FROM
+        meal,
+        _order
+        WHERE
+        paid = 1
+        AND meal.id = _order.mealId
+        <if test="specific != null">
+            AND
+            <foreach item="category" collection="specific" separator="," open="category in (" close=")" index="">
+                #{category, jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        <if test="sdate != null and edate != null">
+            AND DATE_FORMAT(`odate`, '%m-%d') >= DATE_FORMAT(#{sdate}, '%m-%d')
+            AND DATE_FORMAT(`odate`, '%m-%d') &lt;= DATE_FORMAT(#{edate}, '%m-%d')
+        </if>
+        GROUP BY category
+        <choose>
+            <when test="sort == 'turnoverDesc'">
+                ORDER BY prices desc
+            </when>
+            <when test="sort == 'turnoverAsc'">
+                ORDER BY prices asc
+            </when>
+            <when test="sort == 'salesDesc'">
+                ORDER BY quantities desc
+            </when>
+            <when test="sort == 'salesAsc'">
+                ORDER BY quantities asc
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

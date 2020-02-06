@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.orderMeal.mapper.EvaluationMapper">
+    <select id="selectAllEva" resultType="java.util.Map">
+        SELECT
+            evaluation.id,
+            userId,
+            `user`.name,
+            mealId,
+            `desc`,
+            star,
+            DATE_FORMAT(
+                `edate`,
+                '%Y-%m-%d %H:%i:%S'
+            ) AS edate
+        FROM
+            evaluation,
+            user
+        WHERE
+            evaluation.userId = user .id
+    </select>
+    <select id="selectEvaByMealId" resultType="Evaluation">
+        select * from evaluation where mealId = #{mealId} order by edate
+    </select>
+    <select id="selectGroupByMeal" resultType="java.util.Map">
+        SELECT
+            meal.id as mealId,
+            meal.`name` as mealName,
+            meal.category,
+            count(userId) AS quantity,
+            sum(star)/count(userId) as rate
+        FROM
+            evaluation,
+            meal,
+            USER
+        WHERE
+            meal.id = evaluation.mealId
+        AND `user`.id = evaluation.userId
+        GROUP BY
+            mealId
+    </select>
+    <insert id="insertEva">
+        insert into evaluation(mealId,userId,`desc`,star,edate) values(#{mealId},#{userId},#{desc},#{star},#{edate})
+    </insert>
+    <select id="selectUserEva" resultType="evaluation">
+        select * from evaluation where mealId = #{mealId} and userId = #{userId}
+    </select>
+    <update id="updateEva">
+        update evaluation set `desc` = #{desc}, star = #{star}, edate = #{edate} where mealId = #{mealId} and userId = #{userId}
+    </update>
+</mapper>
